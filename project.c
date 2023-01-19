@@ -1,5 +1,3 @@
-// drink Tea and enjoy miv project! Nai Nai :) 
-
 #include <conio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -8,21 +6,18 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 void commander(char *command);
 int create_file(char *);
 void create_folder(char *);
 char *chop_chop(char *);
 
-//glololobal
+
 char command[100];
 char address[1000];
 int counter_of_slash = 1;
 int flag = 0;
 
 // createfile__file/root/dir1/dir2/dir3/file.txt
-
-
 
 int main()
 {
@@ -32,10 +27,6 @@ int main()
     scanf("%[^\n]", address);
     commander(command);
 }
-
-
-
-
 
 void commander(char *command)
 {
@@ -51,17 +42,11 @@ void commander(char *command)
             create_file(chop_chop(address));
             return;
         }
-
     }
 
     else
         printf("You idiot can't write the command correctly!\n");
 }
-
-
-
-
-
 
 char *chop_chop(char *address)
 {
@@ -89,11 +74,6 @@ char *chop_chop(char *address)
     return current;
 }
 
-
-
-
-
-
 int create_file(char *address)
 {
     FILE *file;
@@ -112,10 +92,6 @@ int create_file(char *address)
     }
     return 0;
 }
-
-
-
-
 
 void create_folder(char *address)
 {
