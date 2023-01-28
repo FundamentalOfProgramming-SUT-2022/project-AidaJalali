@@ -237,7 +237,7 @@ void dash_size()
     //continue
 }
 
-void dash f_b()
+int dash_f_b()
 {
     char syntax[MAXSIZE];
     scanf("%[^ ]s" , &syntax);
