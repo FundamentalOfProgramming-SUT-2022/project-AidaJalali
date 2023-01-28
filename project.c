@@ -22,7 +22,7 @@ int doctor_death(char *);
 
 char address[MAXSIZE];
 
-//recognizer address type
+//recognizer
 void r();
 
 //A) address without quotation
@@ -48,7 +48,7 @@ int  dash_f_b();
     int f_b;
 
 //Tools->else
-int find_pos(char*,int,int,int); //find the byte number
+int find_pos(char*,int,int,int); //byte
 char* find_str(int,int);
 
 //Vim Functions
@@ -116,7 +116,7 @@ void commander()
         /*dash_file();
         r();
         dash_str();
-        insert_str(address , "this is a test!this is a test!" , 50 , 2);
+        insert_str(address , "test!this ! test!" , 50 , 2);
         return;*/
     }
     
@@ -259,7 +259,7 @@ int doctor_life(char * address)
     file = fopen(address, "r");
     if(file != NULL)
     {
-        printf("file is alive!\n\n");
+        printf("alive!\n\n");
         fclose(file);
         return 1;
     }
