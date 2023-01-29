@@ -9,341 +9,457 @@
 
 #define MAXSIZE 1024
 
-//TOOLS
+// create_folder stop ( chopchop createfile)
+// remove -b (Bug)
+// copy -b
+// paste -cut (Bug)
+
+// TOOLS
 void commander();
-    char command[MAXSIZE];
+char command[MAXSIZE];
 
-//Tools->Error Functions
-void error();               
-int doctor_life(char *);    
-int doctor_death(char *);   
+// Tools->Error Functions
+void error();
+void error_line();
+void empty_line();
+void doctor_life(char *);
+void doctor_death(char *);
 
-//Tools->Address Functions
-
+// Tools->Address Functions
 char address[MAXSIZE];
 
-//recognizer
+// recognizer
 void r();
 
-//A) address without quotation
-void address_maker_A(); 
-//B) address with quotation
+// A) address without quotation
+void address_maker_A();
+// B) address with quotation
 void address_maker_B();
 
-char* chopchop();
-    void slash_counter();
-        int slash_num = 0;
-        int current_slash = 1;
-    char address_copy[MAXSIZE];
+// char* chopchop();
+void slash_counter();
+int slash_num = 0;
+int current_slash = 0;
+char address_copy[MAXSIZE];
 
-//syntax
+// syntax
 void dash_file();
+
 void dash_pos();
+int x = 0;
+int y = 0;
+
 void dash_str();
+char content[MAXSIZE];
 
-void dash_size(); 
-    int size;
+void dash_size();
+int size;
 
-int  dash_f_b();
-    int f_b;
+int dash_f_b();
+int f_b;
 
-//Tools->else
-int find_pos(char*,int,int,int); //byte
-char* find_str(int,int);
+// Tools->else
+FILE *find_pos(char *, int, int, int, int);
+char *find_str_pos(int, FILE *);
+int line_counter(char *, int); // line = 1
 
-//Vim Functions
+// Vim Functions
 void create_file(char *);
 void create_folder(char *);
-void cat_file(char *);
-void insert_str(char *, char *, int, int);
-void remove_str(char *, int, int, int ,int);
-void copy_str(char *);
-void paste_str(char*);
-void cut_str(char*);
 
+void cat_file(char *);
+
+void insert_str(char *, char *, int, int);
+void remove_str(char *, int, int, int, int);
+
+void copy_str(char *, int, int, int, int);
+void paste_str(char *, int, int);
+void cut_str(char *, int, int); //;ksldfldkla
+
+void comparator(char *, char *);
+void comparator_1(char *, char *, int);
+void comparator_2(char *, char *, int, int);
+
+void auto_indent(char *);
 
 // global Variable
 char str[MAXSIZE]; // for remove and find_str
+char clipboard[MAXSIZE];
 
-
-// *commands list*           *format*
-
-
-// createfile       |  createfile -- file name of file      
-// cat              |                           
-// insert           |                           
-// remove           |                           
-//copystr           |                           
-//pastestr          |                              
-//cutstr            |                          
-//replace           |                     
-//grep              |                                               
-//undo              |
-//auto_indent       |
-//compare           |
-//tree              |
-
-
-int main(int argc , char * argv[])
+int main(int argc, char *argv[])
 {
-    printf("Hi!\nwelcome to vim world!\nplease enter your command.\n\n");
+    printf("Hi!\nwelcome to vim world!\nplease enter your command.\nFor more information use help\n\n");
+    // create_folder("aida/zahra/maraym.txt");
+    // int x = find_pos( "root/aida.txt" , 3 , 5 ,0);
+    // printf("%d" , x);
     commander();
 }
 
-
 void commander()
 {
-    scanf("%[^ ]s" , &command);
+    scanf("%[^ ]s", &command);
     getchar();
+    if (!strcmp(command, "help"))
+    {
+        printf("commands list :\n");
+        printf("createfile        |  createfile --file name_of_file\n");
+        printf("cat               |  cat        --file name_of_file\n");
+        printf("insert            |  insert     --file name_of_file --str content --pos y:x\n");
+        printf("remove            |  removestr  --file name_of_file --pos y:x --size size f_b\n");
+        printf("copy              |  copystr    --file name_of_file --pos y:x --size size f_b\n");
+        printf("paste             |  pastestr   --file name_of_file --pos y:x                \n");
+        printf("cut               |  cutstr     --file name_of_file --pos y:x --size size f_b\n");
+        // replace           |                                                          \n
+        // grep              |                                                          \n
+        // undo              |                                                          \n
+        printf("auto-indent       | auto-indent name_of_file                                 \n");
+        printf("compare           | compare     name_of_file_A name_of_file_B                \n");
+        // tree              |                                                          \n
+        // find              |                                                          \n
+        return;
+    }
     if (!(strcmp(command, "createfile")))
     {
         dash_file();
         r();
+        printf("%s", address);
         create_folder(address);
         return;
     }
 
-    if ( !( strcmp (command, "cat") ) )
+    if (!(strcmp(command, "cat")))
     {
         dash_file();
         r();
+        doctor_death(address);
         cat_file(address);
         return;
     }
 
-    if( ! ( strcmp (command,"insert") ) )
+    if (!(strcmp(command, "insert")))
     {
-        /*dash_file();
+        dash_file();
         r();
+        doctor_death(address);
         dash_str();
-        insert_str(address , "test!this ! test!" , 50 , 2);
-        return;*/
+        dash_pos();
+        insert_str(address, address, y, x);
+        return;
     }
-    
-    if( ! ( strcmp (command,"remove") ) )
+
+    if (!(strcmp(command, "removestr")))
     {
-        /*dashfile();
+        dash_file();
         r();
-        dash_str();
-        remove_str(address , 2 , 3 , 10 , 0);
-        return;*/
+        (doctor_death(address));
+        dash_pos();
+        dash_size();
+        dash_f_b();
+        remove_str(address, y, x, size, f_b);
+        return;
     }
-    if(!(strcmp(command,"copy")))
+
+    // copystr --file /aida/aida.txt --pos 2:3 --size 8 f
+    if (!(strcmp(command, "copystr")))
     {
-        /*dash_file();
+        dash_file();
         r();
-        dash_str();*/
+        doctor_death(address);
+        dash_pos();
+        dash_size();
+        dash_f_b();
+        copy_str(address, y, x, size, f_b);
+        return;
     }
-    if(!(strcmp(command,"paste")))
+    if (!(strcmp(command, "pastestr")))
     {
-        /*dash_file();
+        dash_file();
         r();
-        dash_str();*/
+        doctor_death(address);
+        dash_pos();
+        paste_str(address, y, x);
+        return;
     }
-    if(!(strcmp(command, "cut")))
+    if (!(strcmp(command, "cutstr")))
     {
-        /*dash_file();
+        dash_file();
         r();
-        dash_str();*/
+        doctor_death(address);
+        dash_pos();
+        dash_size();
+        dash_f_b();
+        // remove_str(address , y , x, size ,f_b);
+        return;
     }
-    else error();
+    if (!(strcmp(command, "compare")))
+    {
+        char file_A[MAXSIZE];
+        char file_B[MAXSIZE];
+        scanf("%s", &file_A);
+        getchar();
+        scanf("%s", &file_B);
+
+        doctor_death(file_A);
+        doctor_death(file_B);
+        comparator(file_A, file_B);
+        return;
+    }
+    if (!strcmp(command, "auto_indent"))
+    {
+        printf("toto\n");
+        r();
+        // doctor_death(address);
+        auto_indent(address);
+        return;
+    }
+    else
+        error();
 }
 
 void r()
 {
     char R;
-    scanf("%c" , &R);
-    if(R == '/')
+    scanf("%c", &R);
+    if (R == '/')
     {
         address_maker_A();
         return;
     }
-    if(R == '"')
+    if (R == '"')
     {
         address_maker_B();
         return;
     }
-    else error();
+    else
+        error();
 }
-
 
 void address_maker_A()
 {
-    scanf("%[^ ]s" , &address);
+    scanf("%[^ ]s", &address);
     slash_counter();
     return;
 }
 
 void address_maker_B()
 {
-    //Empty
+    // Empty
 }
 
-char* chopchop()
+char *chopchop()
 {
-    int counter = 0 ;
-    for( int i = 0 ; counter < current_slash ; i++)
-    {   
-        if( address[i] == '/')
+    current_slash++;
+    int counter = 0;
+    for (int i = 0; counter < current_slash; i++)
+    {
+        if (address[i] == '/')
         {
-            counter++ ;
-            if(counter == current_slash) break;
-        } 
+            counter++;
+            if (counter == current_slash)
+                break;
+        }
         address_copy[i] = address[i];
     }
-current_slash ++;
-return(address_copy);
+    // printf("cuurent  is %d\n" , current_slash);
+    printf("***%s\n", address_copy);
+    return (address_copy);
 }
 
 void slash_counter()
 {
-    for(int i = 0 ; address[i] != '\0' ; i++)
+    for (int i = 0; address[i] != '\0'; i++)
     {
-        if(address[i] == '/') slash_num++;
+        if (address[i] == '/')
+            slash_num++;
     }
 }
 
 void dash_file()
-{   
+{
     char syntax[MAXSIZE];
-    scanf("%[^ ]s" , &syntax);
+    scanf("%s", &syntax);
+    printf("%s\n", syntax);
     getchar();
-    if(strcmp(syntax,"--file")) error();
+    if (strcmp(syntax, "--file") != 0)
+        error();
 }
 
 void dash_str()
-{   
+{
     char syntax[MAXSIZE];
-    scanf("%[^ ]s" , &syntax);
+    scanf("%s", &syntax);
+    printf("%s\n", syntax);
     getchar();
-    if(strcmp(syntax,"-str")) error();
+    if (strcmp(syntax, "--str") != 0)
+        error();
 }
 
 void dash_pos()
 {
     char syntax[MAXSIZE];
-    scanf("%[^ ]s" , &syntax);
+    scanf("%s", &syntax);
+    printf("%s\n", syntax);
     getchar();
-    if(strcmp(syntax,"-pos")) error();
-    //continue
+    if (strcmp(syntax, "--pos") != 0)
+        error();
+    scanf("%d", &y);
+    getchar(); // for :
+    scanf("%d", &x);
 }
 
 void dash_size()
 {
     char syntax[MAXSIZE];
-    scanf("%[^ ]s" , &syntax);
+    scanf("%s", &syntax);
+    printf("%s\n", syntax);
     getchar();
-    if(strcmp(syntax,"-size")) error();
-    //continue
+    if (strcmp(syntax, "--size") != 0)
+        error();
+    scanf("%d", &size);
+    printf("%d\n", size);
 }
 
 int dash_f_b()
 {
-    char syntax[MAXSIZE];
-    scanf("%[^ ]s" , &syntax);
-    getchar();
-    if(strcmp(syntax,"-f") || strcmp(syntax , "-b")) error();
-    //continue
-}
+    getchar(); // for -
+    char R = getchar();
 
+    if (R == 'f')
+        f_b = 1;
+    else if (R = 'b')
+        f_b = 0;
+    else
+        error();
+}
 
 void error()
 {
-    printf("invalid command!");
+    printf("invalid command!\n");
     exit(0);
 }
 
-int doctor_life(char * address) 
+void error_line()
 {
-    FILE *file ;
+    printf("file is too short!\n");
+    exit(0);
+}
+
+void empty_line()
+{
+    printf("Empty line!\n");
+    exit(0);
+}
+
+void doctor_life(char *address)
+{
+    FILE *file;
     file = fopen(address, "r");
-    if(file != NULL)
+    if (file != NULL)
     {
         printf("alive!\n\n");
         fclose(file);
-        return 1;
+        exit(0);
     }
-    else return 0 ;
+    fclose(file);
+    return;
 }
 
-int doctor_death( char* address)
+void doctor_death(char *address)
 {
-    FILE * file;
-    file = fopen( address , "r");
-    if(file == NULL)
+    FILE *file;
+    file = fopen(address, "r");
+    if (file == NULL)
     {
         printf("No such file exists in Vim world!\n\n");
         fclose(file);
-        return 1;
+        exit(0);
     }
-    else return 0 ;
+    fclose(file);
+    return;
 }
 
-int find_pos(char *address ,int line_pos, int char_pos,int direction) // (f = 1 & b = 0) //delay!
+int line_counter(char *address, int y)
+{
+    char ch;
+    FILE *file;
+    file = fopen(address, "r");
+    ch = fgetc(file);
+    while (ch != EOF)
+    {
+        if (ch == '\n')
+            y++;
+        ch = fgetc(file);
+    }
+    fclose(file);
+    return y;
+}
+
+FILE *find_pos(char *address, int y, int x, int f_b, int size) // (f = 1 & b = 0) //delay!
 {
     FILE *file;
-    file = fopen(address , "wb");
-    for( int i = 0 ; i < line_pos - 1; i++)
+    file = fopen(address, "r");
+    int y_counter = 1;
+    int x_counter = 1;
+    while (y_counter < y)
     {
-        while(1)
+        char c = fgetc(file);
+        if (c == '\n')
         {
-            char c = fgetc(file);
-            if( c == '\n')break;
+            y_counter++;
+            continue;
         }
     }
-    int count = ftell(file);
-    fclose(file);
-    if(direction)
+    while (x_counter < x)
     {
-        return(count + char_pos);
+        char c = fgetc(file);
+        x_counter++;
     }
-    else return(count - char_pos);
+    if (f_b == 1)
+    {
+        return file;
+    }
+    if (f_b == 0)
+    {
+        // something in here
+    }
 }
 
-char* find_str(int x,int size)
+char *find_str_pos(int size, FILE *file)
 {
-    FILE* file;
-    file = fopen(address,"wb");
-    fseek(file , x , SEEK_SET);
-    for(int i = 0 ; i <= size ;i++)
+    for (int i = 0; i < size; i++)
     {
-        str[i] = fgetc(file);
+        char c = fgetc(file);
+        str[i] = c;
     }
     fclose(file);
     return str;
 }
 
-
-//                                 *****************Vim Functions*************** 
-
+//                                 *****************Vim Functions***************
 
 void create_folder(char *address)
 {
-    if( slash_num == current_slash)
+    if (slash_num == current_slash)
     {
         create_file(address);
         return;
     }
-    while(slash_num >= current_slash)
+    if (slash_num > current_slash)
     {
-        //printf("%d %d\n" , slash_num ,current_slash);
-        int check = mkdir(chopchop());
-        printf("****%s\n" ,address_copy);
-
-        //if(check) error();
-        
-        if(!check)
-            printf("Nai Nai folder created!\n");
-            continue;
-    }   
+        chopchop();
+        doctor_life(address_copy);
+        create_folder(address);
+        mkdir(address_copy);
+        printf("Nai Nai folder created!\n");
+        create_folder(address);
+    }
 }
 
 void create_file(char *address)
 {
-    if(doctor_life(address)) return;
-    chopchop(address);
-    
-    FILE  *file;
+    doctor_life(address);
+
+    FILE *file;
     fopen(address, "w");
     printf("Nai Nai file created\n");
     fclose(file);
@@ -351,149 +467,288 @@ void create_file(char *address)
 
 void cat_file(char *address)
 {
-    if (doctor_death(address) == 1)
+    doctor_death(address);
+
+    FILE *file;
+    file = fopen(address, "r");
+    char ch;
+    while (!feof(file))
     {
-        return;
+        ch = fgetc(file);
+        printf("%c", ch);
     }
-    else
-    {
-        FILE * file;
-        file = fopen(address , "r");
-        char ch;
-        while (!feof(file))
-        {
-            ch = fgetc(file);
-            printf("%c", ch);
-        }
-        fclose(file);
-    }
+    printf("Nai Nai\n");
+    fclose(file);
 }
 
 void insert_str(char *address, char *text, int line_pos, int char_pos)
 {
-  if(doctor_death(address) == 1) return;
-    
-    FILE  *file ,*copy ;
+    FILE *file, *copy;
 
     char copy_name[MAXSIZE] = {0};
-    strcpy(copy_name,address);
-    strcat(copy_name,"___copy");
+    strcpy(copy_name, address);
+    strcat(copy_name, "___copy");
 
-    file = fopen(address , "r");
+    file = fopen(address, "r");
     copy = fopen(copy_name, "w");
-    
+
     int current_line = 1;
     int current_char = 0;
-        
-    while(1)
-     {
-        char ch ;
+
+    while (1)
+    {
+        char ch;
         int i = 0;
         ch = fgetc(file);
 
-        if(feof(file))
+        if (feof(file))
         {
-            if(current_line > line_pos) break;
+            if (current_line > line_pos)
+                break;
 
-            else if(current_line < line_pos)
+            else if (current_line < line_pos)
             {
-                fputc('\n' ,copy);
+                fputc('\n', copy);
                 current_line++;
             }
             else
             {
-                for( int i = 0 ; i < char_pos ; i++ )
+                for (int i = 0; i < char_pos; i++)
                 {
                     printf("\n");
-                    fputc( ' ' , copy);
+                    fputc(' ', copy);
                 }
-                fputs( text , copy) ;
+                fputs(text, copy);
                 break;
             }
         }
 
-        else{
+        else
+        {
 
-            fputc(ch ,copy); 
-            if(current_line == line_pos)
+            fputc(ch, copy);
+            if (current_line == line_pos)
             {
-                if( current_char == char_pos) fputs(text , copy);
+                if (current_char == char_pos)
+                    fputs(text, copy);
                 current_char++;
             }
-            if(ch == '\n')  current_line++;
-            }
+            if (ch == '\n')
+                current_line++;
+        }
     }
 
     fclose(file);
     fclose(copy);
 
-    rename(copy_name,address);
     remove(address);
+    rename(copy_name, address);
 
     printf("text inserted!\n");
-    
 }
 
-void remove_str( char* address , int line_pos , int char_pos , int size , int direction)//( f = 1 & b = 0) //problem
+void remove_str(char *address, int line_pos, int char_pos, int size, int direction) //( f = 1 & b = 0) //problem
 {
-    if(doctor_death(address) == 1) return;
-
-    FILE  *file ,*copy ;
+    FILE *file, *copy;
 
     char copy_name[MAXSIZE] = {0};
-    strcpy(copy_name,address);
-    strcat(copy_name,"___copy");
+    strcpy(copy_name, address);
+    strcat(copy_name, "___copy");
 
-    file = fopen(address , "r");
+    file = fopen(address, "r");
     copy = fopen(copy_name, "w");
 
-    //int x = find_pos(address,line_pos,char_pos,direction);
-    int x = 32 ;
+    // int x = find_pos(address,line_pos,char_pos,direction);
+    int x = 32;
 
-    while(!EOF)
+    while (!EOF)
     {
         char ch = fgetc(file);
-        if( ftell(file) == x)
+        if (ftell(file) == x)
         {
-           for( int i = 0 ; i < size ; i++)
-           {
-            fgetc(file);
-           }
+            for (int i = 0; i < size; i++)
+            {
+                fgetc(file);
+            }
         }
-        else fputc(ch ,copy);
+        else
+            fputc(ch, copy);
     }
 
     fclose(file);
     fclose(copy);
-    rename(copy_name,address);
+    rename(copy_name, address);
     remove(address);
 
     printf("text removed!\n");
 }
 
-void copy_str(char * str)
+void copy_str(char *address, int y, int x, int size, int f_b)
 {
-    OpenClipboard(0);
-    EmptyClipboard();
-    const size_t len = strlen(str) + 1 ;
-    HGLOBAL H = GlobalAlloc(GMEM_MOVEABLE , len);
-    GlobalUnlock(H);
-    SetClipboardData(CF_TEXT, H);
-    CloseClipboard();
+    FILE *file = fopen(address, "r");
+
+    clipboard[0] = '\0';
+    char content[MAXSIZE];
+
+    for (int line = 0; line < y; line++)
+    {
+        fgets(content, MAXSIZE, file);
+        if (content == NULL)
+        {
+            fclose(file);
+            error_line();
+        }
+    }
+    for (int ch = 0; ch < x; ch++)
+    {
+        fgetc(file);
+    }
+    for (int i = 0; i < size; i++)
+    {
+        char ch = fgetc(file);
+        clipboard[i] = ch;
+    }
+    // printf("%s" , clipboard);
+    printf("Text Copied to Clipboard!\n");
+    fclose(file);
 }
 
-void paste_str(char * address)
+void paste_str(char *address, int y, int x)
 {
-    HANDLE H;
-    char * str;
-    OpenClipboard(0);
-    H = GetClipboardData(CF_TEXT);
-    strcpy(str , (char *)H) ; 
-    CloseClipboard();
+    FILE *file = fopen(address, "w");
+
+    if (clipboard == NULL)
+    {
+        printf("Empty!");
+        exit(0);
+    }
+    for (int line = 0; line < y; line++)
+    {
+        fgets(content, MAXSIZE, file);
+        if (content == NULL)
+        {
+            fclose(file);
+            error_line();
+        }
+    }
+    for (int ch = 0; ch < x; ch++)
+    {
+        fgetc(file);
+    }
+    for (int i = 0; i < size; i++)
+    {
+        char ch = fgetc(file);
+        fputc(clipboard[i], file);
+    }
+
+    clipboard[0] = '\0';
+
+    printf("Nai Nai!\n");
+    fclose(file);
 }
 
-void cut_str(char * address)
+void comparator(char *file_A, char *file_B)
 {
-    copy_str(str);
-    remove(str);
+    int A_num = line_counter(file_A, 1);
+    int B_num = line_counter(file_B, 1);
+    if (A_num == B_num)
+        comparator_1(file_A, file_B, A_num);
+    if (A_num > B_num)
+        comparator_2(file_A, file_B, A_num, B_num);
+    if (A_num < B_num)
+        comparator_2(file_B, file_A, B_num, A_num);
+
+    return;
+}
+
+void comparator_1(char *file_A, char *file_B, int num)
+{
+    FILE *A;
+    FILE *B;
+    A = fopen(file_A, "r");
+    B = fopen(file_B, "r");
+    char A_l[MAXSIZE];
+    char B_l[MAXSIZE];
+    for (int i = 1; i < num; i++)
+    {
+        fgets(A_l, MAXSIZE, A);
+        fgets(B_l, MAXSIZE, B);
+        if (strcmp(A_l, B_l))
+        {
+            printf("======== #%d ========\n", i);
+            printf("%s\n", A_l);
+            printf("%s\n", B_l);
+        }
+    }
+    fclose(A);
+    fclose(B);
+    return;
+}
+
+void comparator_2(char *file_A, char *file_B, int N, int n) // N --> Big
+{
+    comparator_1(file_A, file_B, n);
+    FILE *file;
+    file = fopen(file_A, "r");
+    char line[MAXSIZE];
+    for (int i = 1; i < n; i++)
+    {
+        fgets(line, MAXSIZE, file);
+    }
+    for (int i = n; i <= N; i++)
+    {
+        fgets(line, MAXSIZE, file);
+        printf("<<<<<<<<<< #%d - #%d <<<<<<<<<\n", n, N);
+        printf("%s\n", line);
+    }
+    fclose(file);
+    return;
+}
+
+void auto_indent(char *address)
+{
+    FILE *file;
+    FILE *copy;
+
+    char copy_name[MAXSIZE] = {0};
+    strcpy(copy_name, address);
+    strcat(copy_name, "___copy");
+
+    file = fopen(address, "r");
+    copy = fopen(copy_name, "w");
+
+    int space_num = 4;
+    int co = 1;
+
+    char line[MAXSIZE];
+    char out_put[MAXSIZE];
+    fgets(line, MAXSIZE, file);
+
+    if (line == NULL)
+        empty_line();
+
+    while (1)
+    {
+        printf("toto\n");
+        char ch = getc(file);
+        if (ch == '\n')
+        {
+            printf("%s", out_put);
+            fclose(file);
+            fclose(copy);
+
+            remove(address);
+            rename(copy_name, address);
+            break;
+        }
+        if (ch == '{' || ch == '}')
+        {
+            fputs("\n", file);
+            for (int i = 0; i < (co * space_num); i++)
+            {
+                fputc(' ', file);
+            }
+        }
+        fputc(ch, file);
+    }
 }
