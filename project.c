@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <windows.h>
+#include <dirent.h>
 
 #define MAXSIZE 1024
 
@@ -74,13 +75,15 @@ void remove_str(char *, int, int, int, int);
 
 void copy_str(char *, int, int, int, int);
 void paste_str(char *, int, int);
-void cut_str(char *, int, int); //;ksldfldkla
+void cut_str(char *, int, int);
 
 void comparator(char *, char *);
 void comparator_1(char *, char *, int);
 void comparator_2(char *, char *, int, int);
 
 void auto_indent(char *);
+
+void tree(int);
 
 // global Variable
 char str[MAXSIZE]; // for remove and find_str
@@ -89,9 +92,6 @@ char clipboard[MAXSIZE];
 int main(int argc, char *argv[])
 {
     printf("Hi!\nwelcome to vim world!\nplease enter your command.\nFor more information use help\n\n");
-    // create_folder("aida/zahra/maraym.txt");
-    // int x = find_pos( "root/aida.txt" , 3 , 5 ,0);
-    // printf("%d" , x);
     commander();
 }
 
@@ -206,11 +206,16 @@ void commander()
     }
     if (!strcmp(command, "auto_indent"))
     {
-        printf("toto\n");
         r();
-        // doctor_death(address);
+        doctor_death(address);
         auto_indent(address);
         return;
+    }
+    if (!strcmp(command, "tree"))
+    {
+        int depth;
+        scnaf("%d", &depth);
+        tree(depth);
     }
     else
         error();
@@ -348,6 +353,17 @@ void empty_line()
 {
     printf("Empty line!\n");
     exit(0);
+}
+
+void invalid_depth()
+{
+    printf("invalid Depth!");
+    exit(0);
+}
+
+void opendir()
+{
+    printf("Could not open directory\n");
 }
 
 void doctor_life(char *address)
@@ -717,38 +733,68 @@ void auto_indent(char *address)
     file = fopen(address, "r");
     copy = fopen(copy_name, "w");
 
-    int space_num = 4;
-    int co = 1;
+    char ch = fgetc(file);
+    if (ch == NULL)
+        line_error();
 
-    char line[MAXSIZE];
-    char out_put[MAXSIZE];
-    fgets(line, MAXSIZE, file);
+    fseek(file, 0, SEEK_SET);
 
-    if (line == NULL)
-        empty_line();
-
+    int counter = 0;
     while (1)
     {
-        printf("toto\n");
-        char ch = getc(file);
-        if (ch == '\n')
+        char ch = fgetc(file);
+        if (ch != EOF)
         {
-            printf("%s", out_put);
+            if (ch == '{')
+            {
+                fputs("\n", copy);
+                for (int i = 0; i < counter; i++)
+                    fputs("\t", copy);
+                fputc(ch, copy);
+                counter++;
+                fputs("\n", copy);
+                for (int i = 0; i < counter; i++)
+                    fputs("\t", copy);
+            }
+
+            else if (ch == '}')
+            {
+                counter--;
+                fputs("\n", copy);
+                for (int i = 0; i < counter; i++)
+                    fputs("\t", copy);
+
+                fputc(ch, copy);
+            }
+            else
+                fputc(ch, copy);
+        }
+        else
+        {
             fclose(file);
             fclose(copy);
 
             remove(address);
             rename(copy_name, address);
-            break;
+            exit(0);
         }
-        if (ch == '{' || ch == '}')
-        {
-            fputs("\n", file);
-            for (int i = 0; i < (co * space_num); i++)
-            {
-                fputc(' ', file);
-            }
-        }
-        fputc(ch, file);
     }
+}
+
+void tree(int depth)
+{
+    /*struct entry * d;
+    DIR * dir = opendir(".");
+
+    if(dir == NULL) printf("Could not open directory");
+
+    for( int i = 0 ; i < depth ; i++)
+    {
+        if( (dir = readdir(dir)) == NULL)
+        {
+            closedir(d);
+            invalid_depth();
+        }
+
+    }*/
 }
