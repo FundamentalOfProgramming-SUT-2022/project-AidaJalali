@@ -11,10 +11,10 @@
 
 #define MAXSIZE 1024
 
-// create_folder stop ( chopchop createfile)
-// remove -b (Bug)
+// create_folder stop (multiple directories)
+// insert commander
 // copy -b
-// paste -cut (Bug)
+// paste & cut error
 
 // BASE
 void commander();
@@ -25,7 +25,6 @@ void Done();
 void r();               // Recognizer
 void address_maker_A(); // A) address without quotation
 void address_maker_B(); // B) address with quotation
-char *chopchop();       // seprate address
 void slash_counter();
 
 // syntax
@@ -34,6 +33,8 @@ void dash_pos();
 void dash_str();
 void dash_size();
 void dash_f_b();
+void dash_files();
+void dash_option();
 
 // Tools
 void doctor_life(char *);
@@ -58,37 +59,50 @@ void copy_str(char *, int, int, int, int);
 void paste_str(char *, int, int);
 void cut_str(char *, int, int);
 
+void grep_commander(char *);
+void grep(char *, char *);
+
 void comparator(char *, char *);
 void comparator_1(char *, char *, int);
 void comparator_2(char *, char *, int, int);
 
 void auto_indent(char *);
 
-void tree(int);
+void tree(char *address, int depth);
 
 void undo(char *);
 void undo_memory(char *);
 
 // VARIABLE
 char command[MAXSIZE];
-char address[MAXSIZE];
-char address_copy[MAXSIZE]; // for remove function
-char str[MAXSIZE];          // for remove and find_str
-char clipboard[MAXSIZE];    // for copy function
-char content[MAXSIZE];      // for --str function
-int size;                   // for --size function
-int slash_num = 0;          // for slash counter
-int current_slash = 0;      // for slash counter
-int x = 0;                  // for pos
-int y = 0;                  // for pos
-int f_b = 0;                // forward and backward ( f = 1 & b = 0)
+char address[MAXSIZE] = "root/";
+char address_copy[MAXSIZE];     // for remove function
+char clipboard[MAXSIZE];        // for copy function
+char content[MAXSIZE];          // for --str function
+char file_list[MAXSIZE];        // for grep
+char str[MAXSIZE];              // for remove and grep
+int size;                       // for --size function
+int slash_num = 0;              // for slash counter
+int current_slash = 0;          // for slash counter
+int x = 0;                      // for pos
+int y = 0;                      // for pos
+int f_b = 0;                    // forward and backward ( f = 1 & b = 0)
+int c = 0 ;                     // for c option in grep
+char option;                    // for grep command ()
+char *token;                    // for grep_commander
 
 int main()
 {
     printf("Hi!\nwelcome to vim world!\nplease enter your command.\nFor more information use help\n\n");
-    // commander();
-    // undo("aida/aida.txt");
-    // insert_str("aida/aida.txt", "hello mello*******************", 10, 3);
+    // tree(address, 1);
+      commander();
+    //   createfile --file "/aida/manhatan.txt"
+    //   undo("aida/aida.txt");
+    //   insert_str("aida/aida.txt", "hello mello*******************", 10, 3);
+    //   copystr --file /aida/aida.txt --pos 3:2 --size 9 f
+    //   pastestr --file /aida/aida.txt --pos 3:2
+    //grep -c --str toto --files root/test1.txt root/test2.txt root/test3.txt 
+    //grep --str toto --files root/test1.txt root/test2.txt root/test3.txt 
 }
 
 void commander()
@@ -97,20 +111,21 @@ void commander()
     getchar();
     if (!strcmp(command, "help"))
     {
-        printf("commands list :\n");
+        printf("list :\n");
         printf("createfile        |  createfile --file name_of_file\n");
         printf("cat               |  cat        --file name_of_file\n");
-        printf("insert            |  insert     --file name_of_file --str content --pos y:x\n");
-        printf("remove            |  removestr  --file name_of_file --pos y:x --size size f_b\n");
-        printf("copy              |  copystr    --file name_of_file --pos y:x --size size f_b\n");
-        printf("paste             |  pastestr   --file name_of_file --pos y:x                \n");
-        printf("cut               |  cutstr     --file name_of_file --pos y:x --size size f_b\n");
-        printf("auto-indent       | auto-indent name_of_file                                 \n");
-        printf("compare           | compare     name_of_file_A name_of_file_B                \n");
-        printf("tree              | tree depth                                               \n");
-        printf("undo              | undo        --file name_of_file                          \n");
-        printf("replace           |                                                          \n");
-        printf("find              |                                                          \n");
+        printf("insert            |  insert     --file name_of_file --str content --pos y:x   \n");
+        printf("remove            |  removestr  --file name_of_file --pos y:x --size size f_b \n");
+        printf("copy              |  copystr    --file name_of_file --pos y:x --size size f_b \n");
+        printf("paste             |  pastestr   --file name_of_file --pos y:x                 \n");
+        printf("cut               |  cutstr     --file name_of_file --pos y:x --size size f_b \n");
+        printf("grep              |  grep       --str (option) content --files name_of_files  \n");
+        printf("auto-indent       |  auto-indent name_of_file                                 \n");
+        printf("compare           |  compare     name_of_file_A name_of_file_B                \n");
+        printf("tree              |  tree depth                                               \n");
+        printf("undo              |  undo        --file name_of_file                          \n");
+        printf("replace           |                                                           \n");
+        printf("find              |                                                           \n");
         return;
     }
 
@@ -118,6 +133,8 @@ void commander()
     {
         dash_file();
         r();
+        current_slash = 0;
+        doctor_life(address);
         create_folder(address);
         Done();
     }
@@ -130,7 +147,7 @@ void commander()
         cat_file(address);
         Done();
     }
-    // insertstr --file /aida/aida.txt --str hello my name is polo --pos 2:5
+
     if (!(strcmp(command, "insertstr")))
     {
         dash_file();
@@ -147,7 +164,7 @@ void commander()
         insert_str(address, str, y, x);
         Done();
     }
-    // removestr --file /aida/aida.txt --pos 3:2 --size 4 f
+
     if (!(strcmp(command, "removestr")))
     {
         dash_file();
@@ -171,7 +188,6 @@ void commander()
         Done();
     }
 
-    // copystr --file /aida/aida.txt --pos 2:3 --size 8 f
     if (!(strcmp(command, "copystr")))
     {
         dash_file();
@@ -184,6 +200,7 @@ void commander()
         copy_str(address, y, x, size, f_b);
         Done();
     }
+
     if (!(strcmp(command, "pastestr")))
     {
         dash_file();
@@ -195,6 +212,7 @@ void commander()
         paste_str(address, y, x);
         Done();
     }
+
     if (!(strcmp(command, "cutstr")))
     {
         dash_file();
@@ -205,9 +223,20 @@ void commander()
         dash_f_b();
         place_checker(address, y, x, size);
         undo_memory(address);
-        // remove_str(address , y , x, size ,f_b);
+        copy_str(address, y, x, size, f_b);
+        remove_commander(address, y, x, size, f_b);
         Done();
     }
+
+    if (!(strcmp(command, "grep")))
+    {
+        dash_option();
+        dash_str();
+        dash_files();
+        grep_commander(file_list);
+        Done();
+    }
+
     if (!(strcmp(command, "compare")))
     {
         char file_A[MAXSIZE];
@@ -221,6 +250,7 @@ void commander()
         comparator(file_A, file_B);
         Done();
     }
+
     if (!strcmp(command, "auto_indent"))
     {
         r();
@@ -229,12 +259,18 @@ void commander()
         auto_indent(address);
         Done();
     }
+
     if (!strcmp(command, "tree"))
     {
-        /*int depth;
-        scnaf("%d", &depth);
-        tree(depth);*/
+        int depth;
+        scanf("%d", &depth);
+        for (int i = 0; i < strlen(address) - 1; i++)
+        {
+            address_copy[i] = address[i + 1];
+        }
+        tree(address_copy, depth);
     }
+
     if (!strcmp(command, "undo"))
     {
         dash_file();
@@ -248,7 +284,7 @@ void commander()
         error(0);
 }
 
-//                               *****************ERROR LIST*****************
+//                                   *****************ERROR LIST*****************
 
 void error(int num)
 {
@@ -305,7 +341,16 @@ void error(int num)
         exit(1);
 
     case 10:
+
         printf("Empty Clipboard!");
+        exit(1);
+
+    case 11:
+        printf("Unable to create folder!");
+        exit(1);
+
+    case 12:
+        printf("No such Directory exists in Vim world!");
         exit(1);
 
     default:
@@ -330,21 +375,40 @@ void dash_file()
     if (strcmp(syntax, "--file") != 0)
         error(0);
 
-    printf("%s\n", syntax);
+    // printf("%s\n", syntax);
 }
 
 void dash_str()
 {
     char syntax[MAXSIZE];
+    char temp[MAXSIZE];
+
     scanf("%s", &syntax);
     getchar();
-    scanf("%[^-]s", &str);
+    scanf("%[^-]s", &temp);
+    
+    //printf("%s\n" , syntax);
 
-    if (strcmp(syntax, "--str") != 0)
+    if ((strcmp(syntax, "--str") != 0) && (strcmp(syntax ,"-str")!= 0) && strcmp(syntax , "str") != 0)
         error(0);
 
-    printf("syntax is %s\n", syntax);
-    printf("str is %s\n", str);
+    if (temp[0] == '"')
+    {
+        for (int i = 0; i < strlen(temp) - 3; i++)
+        {
+            str[i] = temp[i + 1];
+        }
+    }
+
+    else
+    {
+        for (int i = 0; i < strlen(temp); i++)
+        {
+            str[i] = temp[i];
+        }
+    }
+    // printf("syntax is %s\n", syntax);
+    // printf("str is %s\n", str);
 }
 
 void dash_pos()
@@ -362,8 +426,8 @@ void dash_pos()
     if ((isdigit(x) != 0) || (isdigit(y) != 0))
         error(0);
 
-    printf("syntax is %s\n", syntax);
-    printf("y is %d and x is %d\n", y, x);
+    // printf("syntax is %s\n", syntax);
+    // printf("y is %d and x is %d\n", y, x);
 }
 
 void dash_size()
@@ -379,8 +443,30 @@ void dash_size()
     if (isdigit(size) != 0)
         error(7);
 
-    printf("syntax is %s\n", syntax);
-    printf("size is %d\n", size);
+    // printf("syntax is %s\n", syntax);
+    // printf("size is %d\n", size);
+}
+
+void dash_files()
+{
+    char syntax[MAXSIZE];
+    scanf("%s", &syntax);
+
+    if (strcmp(syntax, "--files") != 0)
+        error(0);
+
+    getchar();
+    gets(file_list);
+}
+
+void dash_option()
+{
+    getchar();  //for -
+    option = getchar();
+    //printf("%c\n" , option);
+    if ((option != '-') && (option != 'l') && (option != 'c'))
+        error(0);
+    return;
 }
 
 void dash_f_b()
@@ -424,36 +510,30 @@ void r()
 
 void address_maker_A()
 {
-    scanf("%[^ ]s", &address);
+    address[0] = '\0';
+    scanf("%s", &address);
+    strcat("root/", address);
     slash_counter();
     return;
 }
 
 void address_maker_B()
 {
-    // Empty
-}
+    address[0] = '\0';
+    char temp[MAXSIZE];
+    getchar(); // for /
+    scanf("%s", &temp);
 
-char *chopchop()
-{
-    /*current_slash++;
-    int counter = 0;
-    for (int i = 0; counter < current_slash; i++)
+    for (int i = 0; i < strlen(temp) - 1; i++)
     {
-        if (address[i] == '/')
-        {
-            counter++;
-            if (counter == current_slash)
-                break;
-        }
-        address_copy[i] = address[i];
+        address[i] = temp[i];
     }
-    // printf("cuurent  is %d\n" , current_slash);
-    printf("***%s\n", address_copy);
-    return (address_copy);*/
+    strcat("root/", address);
+    slash_counter();
+    return;
 }
 
-//                                       ***************TOOLS*****************
+//                                      ***************TOOLS*****************
 
 void doctor_life(char *address) // 1 --> error
 {
@@ -535,38 +615,38 @@ int line_counter(char *address, int y)
 
 void slash_counter()
 {
-    for (int i = 0; address[i] != '\0'; i++)
+    for (int i = 0; i < strlen(address); i++)
     {
         if (address[i] == '/')
+        {
             slash_num++;
+        }
     }
 }
 
-//                                 *****************VIM FUNCTIONS*****************
+//                                  *****************VIM FUNCTIONS*****************
 
 void create_folder(char *address)
 {
-    if (slash_num == current_slash)
+    strcpy(address_copy, address);
+    char *token = strtok(address_copy, "/");
+    int check = mkdir(token);
+    current_slash++;
+
+    while (slash_num > current_slash)
     {
-        create_file(address);
-        return;
+        token = strtok(NULL, "/");
+        int check = mkdir(token);
+        if (check)
+            error(11);
+        current_slash++;
     }
-    if (slash_num > current_slash)
-    {
-        chopchop();
-        doctor_life(address_copy);
-        create_folder(address);
-        mkdir(address_copy);
-        create_folder(address);
-    }
+    create_file(address);
 }
 
 void create_file(char *address)
 {
-    doctor_life(address);
-
-    FILE *file;
-    fopen(address, "w");
+    FILE *file = fopen(address, "w");
     fclose(file);
     return;
 }
@@ -671,7 +751,7 @@ void remove_commander(char *address, int y, int x, int size, int f_b)
     }
 }
 
-void remove_str_f(char *address, int y, int x, int size) //( f = 1 & b = 0) //incomplete
+void remove_str_f(char *address, int y, int x, int size) //( f = 1 & b = 0)
 {
     // y starts from 1 and x starts from 0
     char copy_name[MAXSIZE] = {0};
@@ -827,6 +907,80 @@ void paste_str(char *address, int y, int x)
     }
 
     clipboard[0] = '\0';
+    fclose(file);
+    return;
+}
+
+void grep_commander(char *file_list)
+{
+    token = strtok(file_list, " ");
+
+    doctor_death(token);
+    grep(token, str);
+
+    while (token != NULL)
+    {
+        token = strtok(NULL, " ");
+
+        if (token != NULL)
+        {
+            doctor_death(token);
+            grep(token , str);
+        }
+    }
+    if(option == 'c')
+    {
+        printf("%d\n" , c);
+        return;
+    }
+}
+
+void grep(char *add, char *str)
+{
+    FILE *file = fopen(add, "r");
+
+    int n = line_counter(add, 1);
+
+    for (int i = 0; i < n; i++)
+    {
+        char line[MAXSIZE];
+        fgets(line, MAXSIZE, file);
+        int k = 0;
+
+        for (int j = 0; j < strlen(line); j++)
+        {
+            while (line[j] == str[k])
+            {
+                k++;
+                j++;
+            }
+            if (strlen(str) == k)
+            {
+                if (option == '-')
+                {
+                    printf("%s\t%s\n", add, line);
+                    k = 0;
+                    break;
+                }
+
+                else if(option == 'l')
+                {
+                    printf("%s\n" ,add);
+                    k = 0;
+                    break; 
+                }
+
+                else if(option == 'c')
+                {
+                    c++;
+                    k = 0 ;
+                    break;
+                }
+
+            }
+            k = 0;
+        }
+    }
     fclose(file);
     return;
 }
@@ -991,17 +1145,29 @@ void undo(char *address)
     return;
 }
 
-void tree(int depth) // incomplete
+void tree(char *address, int depth)
 {
-    /*struct entry * d;
-DIR * dir = opendir(".");
-if(dir == NULL) printf("Could not open directory");
-for( int i = 0 ; i < depth ; i++)
-{
-    if( (dir = readdir(dir)) == NULL)
+    DIR *directory = opendir(address);
+    if (directory == NULL)
+        error(12);
+
+    printf("\t\t|%s-----------------------------\n\t\t|\n", address);
+
+    struct dirent *item;
+    item = readdir(directory);
+    while (item != NULL && depth > 0)
     {
-        closedir(d);
-        invalid_depth();
+        printf("\t\t|---");
+        printf("%s%s\n\t\t|\n", address, item->d_name);
+        if (item->d_type == DT_DIR && strcmp(item->d_name, ".") != 0 && strcmp(item->d_name, "..") != 0)
+        {
+            char path[100] = {0};
+            strcat(path, address);
+            strcat(path, "/");
+            strcat(path, item->d_name);
+            tree(path, depth - 1);
+        }
+        item = readdir(directory);
     }
-}*/
+    closedir(directory);
 }
