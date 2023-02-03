@@ -30,7 +30,8 @@ void slash_counter();
 // syntax
 void dash_file();
 void dash_pos();
-void dash_str();
+void dash_str(char *);
+void dash_str_find();
 void dash_size();
 void dash_f_b();
 void dash_files();
@@ -83,6 +84,8 @@ void find_1();
 void find_2();
 void find_3();
 
+void replace();
+
 // VARIABLE
 char command[MAXSIZE];
 //char address[MAXSIZE] = "root/";
@@ -91,7 +94,10 @@ char address_copy[MAXSIZE];     // for remove function
 char clipboard[MAXSIZE];        // for copy function
 char content[MAXSIZE];          // for --str function
 char file_list[MAXSIZE];        // for grep
-char str[MAXSIZE];              // for remove and grep
+char str[MAXSIZE];              // for remove and grep and find
+char str_copy[MAXSIZE];         // 
+char str1[MAXSIZE];             // for replace command
+char str2[MAXSIZE];             // for replace command
 int  find_option[MAXSIZE];      // for find option (count = 0 - at = 1 - byword = 2 - all = 3)
 int size;                       // for --size function
 int slash_num = 0;              // for slash counter
@@ -101,6 +107,9 @@ int y = 0;                      // for pos
 int f_b = 0;                    // forward and backward ( f = 1 & b = 0)
 int c = 0 ;                     // for c option in grep
 int ch_counter = 0 ;            // for find_0
+int ans = 0 ;                   // for replace
+int word = 0;                   // for find option
+int word_str = 0 ;              // for find option
 char option;                    // for grep command ()
 char *token;                    // for grep_commander
 
@@ -111,14 +120,18 @@ int main()
     commander();
     //   createfile --file "/aida/manhatan.txt"
     //   undo("aida/aida.txt");
-    //   insert_str("aida/aida.txt", "hello mello*******************", 10, 3);
+    //  insert_str("aida/aida.txt", "hello mello*******************", 10, 3);
     //   copystr --file /aida/aida.txt --pos 3:2 --size 9 f
     //   pastestr --file /aida/aida.txt --pos 3:2
     //   grep -c --str toto --files root/test1.txt root/test2.txt root/test3.txt 
     //   grep --str toto --files root/test1.txt root/test2.txt root/test3.txt 
     //   find --str toto --file aida/aida.txt --count --at
+    //   find --str toto --file aida/aida.txt --byword
     //   find --str toto --file aida/aida.txt 
     //   find --str toto --file root/test1.txt
+    //   find --str "toto is moyo" --file root/test1.txt
+    //   find --str "toto is \*motot tototo " --file root/test1.txt
+    //   replace --str1 toto --str2 aidadidaaida --file root/test1.txt
 }
 
 void commander()
@@ -128,21 +141,21 @@ void commander()
     if (!strcmp(command, "help"))
     {
         printf("list :\n");
-        printf("createfile        |  createfile --file name_of_file\n");
-        printf("cat               |  cat        --file name_of_file\n");
-        printf("insert            |  insert     --file name_of_file --str content --pos y:x   \n");
-        printf("remove            |  removestr  --file name_of_file --pos y:x --size size f_b \n");
-        printf("copy              |  copystr    --file name_of_file --pos y:x --size size f_b \n");
-        printf("paste             |  pastestr   --file name_of_file --pos y:x                 \n");
-        printf("cut               |  cutstr     --file name_of_file --pos y:x --size size f_b \n");
-        printf("grep              |  grep       --str (option) content --files name_of_files  \n");
-        printf("auto-indent       |  auto-indent name_of_file                                 \n");
-        printf("compare           |  compare     name_of_file_A name_of_file_B                \n");
-        printf("tree              |  tree        depth                                        \n");
-        printf("undo              |  undo        --file name_of_file                          \n");
-        printf("find              |  find        --str content --file name_of_file  option    \n");
-        printf("replace           |                                                           \n");
-        printf("arman             |                                                           \n");
+        printf("createfile        |  createfile --file name_of_file                                \n");
+        printf("cat               |  cat        --file name_of_file                                \n");
+        printf("insert            |  insert     --file name_of_file --str content --pos y:x        \n");
+        printf("remove            |  removestr  --file name_of_file --pos y:x --size size f_b      \n");
+        printf("copy              |  copystr    --file name_of_file --pos y:x --size size f_b      \n");
+        printf("paste             |  pastestr   --file name_of_file --pos y:x                      \n");
+        printf("cut               |  cutstr     --file name_of_file --pos y:x --size size f_b      \n");
+        printf("grep              |  grep       --str (option) content --files name_of_files       \n");
+        printf("auto-indent       |  auto-indent name_of_file                                      \n");
+        printf("compare           |  compare     name_of_file_A name_of_file_B                     \n");
+        printf("tree              |  tree        depth                                             \n");
+        printf("undo              |  undo        --file name_of_file                               \n");
+        printf("find              |  find        --str content --file name_of_file  option         \n");
+      //printf("replace           |  replace    --str1 content --str2 content --file name_of_file \n");                                                   \n");
+        printf("arman             |                                                                \n");
 
         return;
     }
@@ -171,7 +184,7 @@ void commander()
         dash_file();
         r();
         doctor_death(address);
-        dash_str();
+        dash_str(str);
         dash_pos();
         place_checker(address, y, x, size);
         undo_memory(address);
@@ -249,7 +262,7 @@ void commander()
     if (!(strcmp(command, "grep")))
     {
         dash_option();
-        dash_str();
+        dash_str(str);
         dash_files();
         grep_commander(file_list);
         Done();
@@ -301,7 +314,9 @@ void commander()
 
     if(!strcmp(command , "find"))
     {
-        dash_str();
+        dash_str(str);
+        //printf("0\n");
+        dash_str_find();
         //printf("1\n");
         dash_file();
         //printf("2\n");
@@ -313,7 +328,24 @@ void commander()
         //printf("5\n");
         check_pattern();
         //printf("6\n");
+        //printf("my str is %s\n" ,str);
         find_commander();
+        Done();
+    }
+
+    if(!(strcmp(command , "replace")))
+    {
+        dash_str(str1);
+        //printf("1\n");
+        dash_str(str2);
+        //printf("2\n");
+        dash_file();
+        //printf("3\n");
+        scanf("%s" , &address);      //different type of address (no \ or " ")
+        doctor_death(address);
+        //dash_find_option();
+        //printf("4\n");
+        replace();
         Done();
     }
 
@@ -397,6 +429,21 @@ void error(int num)
         printf("Invalid Pattern!");
         exit(1);
 
+    case 14:
+        
+        printf("%s Not Found!" , str);
+        exit(0);
+
+    case 15:
+
+        printf("0"); //Not Found! (count --> 0)
+        exit(1);
+
+    case 16:
+
+        printf("-1"); //(at --> -1)
+        exit(1);
+        
     default:
         exit(0);
     }
@@ -419,10 +466,10 @@ void dash_file()
     if (strcmp(syntax, "--file") != 0)
         error(0);
 
-    // printf("%s\n", syntax);
+    //printf("%s\n", syntax);
 }
 
-void dash_str()
+void dash_str(char * str)
 {
     char syntax[MAXSIZE];
     char temp[MAXSIZE];
@@ -433,7 +480,7 @@ void dash_str()
     
     //printf("%s\n" , syntax);
 
-    if ((strcmp(syntax, "--str") != 0) && (strcmp(syntax ,"-str")!= 0) && strcmp(syntax , "str") != 0)
+    if ((strcmp(syntax, "--str") != 0) && (strcmp(syntax ,"-str")!= 0) && strcmp(syntax , "str") != 0 && (strcmp(syntax ,"--str1") != 0) && (strcmp(syntax , "--str2")!= 0) )
         error(0);
 
     if (temp[0] == '"')
@@ -453,10 +500,39 @@ void dash_str()
     }
     // printf("syntax is %s\n", syntax);
     // printf("str is %s\n", str);
+    return;
 }
 
 void dash_str_find()
 {
+    for( int i = 0 ; i < strlen(str) ; i++)
+    {
+        if(str[i] == '*')
+        {
+            if((int)str[i - 1] == 92)
+            {
+                for(int j = 0 ; j < strlen(str) - 1 ; j++)
+                {
+                    if( i != j )
+                    {
+                        str_copy[j] = str[i];
+                    }
+                }
+                str[0] = '\0';
+                for(int k = 0 ; k < strlen(str_copy) ; k++ )
+                {
+                    str[k] = str_copy[k];
+                }
+                return;
+                
+            }
+            else
+            {
+                printf("toooo rohe wildcard\n");
+                exit(1);
+            }
+        }
+    }
 
 }
 
@@ -779,7 +855,7 @@ void insert_str(char *address, char *text, int line_pos, int char_pos) // proble
     strcpy(address_copy, address);
     strcat(address_copy, "___copy");
 
-    file = fopen(address, "r");
+    file = fopen(address, "rb+");
     copy = fopen(address_copy, "wb+");
 
     int current_line = 1;
@@ -808,7 +884,17 @@ void insert_str(char *address, char *text, int line_pos, int char_pos) // proble
                     printf("\n");
                     fputc(' ', copy);
                 }
-                fputs(text, copy);
+                for( int j = 0 ; j < strlen(text) ; j++)
+                {
+                    if(text[j] == '\\')
+                    {
+                        fputc('\\', copy);
+                    }
+                    else
+                    {
+                        fputc(text[j] , copy);
+                    }
+                }
                 break;
             }
         }
@@ -820,7 +906,19 @@ void insert_str(char *address, char *text, int line_pos, int char_pos) // proble
             if (current_line == line_pos)
             {
                 if (current_char == char_pos)
-                    fputs(text, copy);
+                {
+                for( int j = 0 ; j < strlen(text) ; j++)
+                {
+                    if(text[j] == '\\')
+                    {
+                        fputc('\\', copy);
+                    }
+                    else
+                    {
+                        fputc(text[j] , copy);
+                    }
+                } 
+                }
                 current_char++;
             }
             if (ch == '\n')
@@ -855,12 +953,11 @@ void remove_commander(char *address, int y, int x, int size, int f_b)
 void remove_str_f(char *address, int y, int x, int size) //( f = 1 & b = 0)
 {
     // y starts from 1 and x starts from 0
-    char copy_name[MAXSIZE] = {0};
-    strcpy(copy_name, address);
-    strcat(copy_name, "___copy");
+    strcpy(address_copy, address);
+    strcat(address_copy, "___copy");
 
-    FILE *file = fopen(address, "r");
-    FILE *copy = fopen(copy_name, "wb+");
+    FILE *file = fopen(address, "rb+");
+    FILE *copy = fopen(address_copy, "wb+");
 
     char ch;
     for (int i = 1; i < y; i++)
@@ -903,12 +1000,11 @@ void remove_str_f(char *address, int y, int x, int size) //( f = 1 & b = 0)
 
 void remove_str_b(char *address, int y, int x, int size)
 {
-    char copy_name[MAXSIZE] = {0};
-    strcpy(copy_name, address);
-    strcat(copy_name, "___copy");
+    strcpy(address_copy, address);
+    strcat(address_copy, "___copy");
 
-    FILE *file = fopen(address, "r");
-    FILE *copy = fopen(copy_name, "wb+");
+    FILE *file = fopen(address, "rb+");
+    FILE *copy = fopen(address_copy, "wb+");
 
     char ch;
     for (int i = 1; i < y; i++)
@@ -1012,42 +1108,38 @@ void paste_str(char *address, int y, int x)
     return;
 }
 
-void cut_str(char * address ,int a ,int b )
-{
-
-}
-
 void find_commander()
 {
-    for(int i = 0 ; i < 4 ; i++)
+    if(find_option[0] == 1)
     {
-        if(find_option[0] == 1)
-        {
-            
-        }
-        if(find_option[1] == 1)
-        {
-
-        }
-        if(find_option[2] == 1)
-        {
-
-        }
-        if(find_option[3] == 1)
-        {
-
-        }
-        else
-        {
-            find_0();
-            return;
-        }
+        find_0(); //count option
+        find_option[0] == 2;
     }
+    if(find_option[1] == 1)
+    {
+        find_1(); //at option
+        find_option[1] == 2;
+    }
+    if(find_option[2] == 1)
+    {
+        find_2(); //byword option
+        find_option[2] == 2 ;
+    }
+    if(find_option[3] == 1)
+    {
+        find_3(); //all option
+        find_option[3] == 2;
+    }
+    if(find_option[0] == 0 && find_option[1] == 0 && find_option[2] == 0 && find_option[3] == 0)
+    {
+        find_0_w();
+        return;
+    }
+    
 }
 
 void find_0_w()
 {
-
     FILE *file = fopen(address, "rb+");
 
     int n = line_counter(address, 1);
@@ -1070,13 +1162,14 @@ void find_0_w()
             if (strlen(str) == k)
             {   
                 printf("It starts from character %d\n" , ch_counter - k);
+                fclose(file);
                 return;
             }
             k = 0;
         }
     }
     fclose(file);
-    return;   
+    error(14);
 
 }
 
@@ -1087,7 +1180,40 @@ void find_1_w() //find with wildcard
 
 void find_0() //count 
 {
+    FILE * file = fopen(address, "rb+");
 
+    int n = line_counter(address, 1);
+
+    ans = 0;
+
+    for (int i = 0; i < n ; i++)
+    {
+        char line[MAXSIZE];
+        fgets(line, MAXSIZE, file);
+    
+        int k = 0;
+        for (int j = 0; j < strlen(line); j++)
+        {
+            while (line[j] == str[k])
+            {
+                k++;
+                j++;
+            }
+            if (strlen(str) == k)
+            {   
+                ans ++; //we need this for copy file
+                k = 0;
+            }
+        }
+    }
+    if( ans == 0)
+    {
+        fclose(file);
+        error(15);   
+    }
+    printf("pattern repetition : %d\n" , ans);
+    fclose(file);
+    return ;
 }
 
 void find_1() //at
@@ -1097,12 +1223,177 @@ void find_1() //at
 
 void find_2() //byword
 {
+    FILE * file = fopen(address, "rb+");
+
+    int n = line_counter(address, 1);
+    word = 0 ;
+    word_str = 0 ;
+
+    ans = 0 ;
+
+    for (int i = 0; i < n ; i++)
+    {
+        char line[MAXSIZE];
+        fgets(line, MAXSIZE, file);
+    
+        int k = 0;
+
+        for (int j = 0; j < strlen(line); j++)
+        {
+            if(line[j] == ' ')
+            {
+                word++;
+            }
+
+            while (line[j] == str[k])
+            {
+                if(line[j] == ' ')
+                {
+                    word++;
+                }
+                k++;
+                j++;
+                ans++;
+            }
+            if (strlen(str) == k)
+            {   
+                for(int k = 0 ; k < strlen(str) ; k++)
+                {
+                    if(str[k] == ' ')
+                        word_str++;
+                }
+                printf("word : %d\n" , word - word_str);
+                fclose(file);
+                return;
+            }
+        }
+    }
+    if( ans == 0)
+    {
+        fclose(file);
+        error(15);   
+    }
+    fclose(file);
+    return ;
 
 }
 
 void find_3() //all
 {
+    FILE * file = fopen(address, "rb+");
 
+    int n = line_counter(address, 1);
+
+    int ch_counter = 0;
+
+    ans = 0 ;
+
+    for (int i = 0; i < n ; i++ , ch_counter++)
+    {
+        char line[MAXSIZE];
+        fgets(line, MAXSIZE, file);
+    
+        int k = 0;
+        for (int j = 0; j < strlen(line); j++ ,ch_counter++)
+        {
+            while (line[j] == str[k])
+            {
+                k++;
+                j++;
+                ans++;
+            }
+            if (strlen(str) == k)
+            {   
+                printf("%d " , ch_counter - k);
+                k = 0;
+            }
+        }
+    }
+    if( ans == 0)
+    {
+        fclose(file);
+        error(15);   
+    }
+    fclose(file);
+    return ;
+}
+
+void replace()
+{
+    FILE *file, *copy;
+
+    strcpy(address_copy, address);
+    strcat(address_copy, "___copy");
+
+    file = fopen(address, "rb+");
+    copy = fopen(address_copy, "wb+");
+    
+
+    int n = line_counter(address, 1);
+    ch_counter = 0 ;
+    for (int i = 0; i < n ; i++ ,ch_counter++)
+    {
+        char line[MAXSIZE];
+        fgets(line, MAXSIZE, file);
+        int k = 0;
+        for (int j = 0; j < strlen(line); j++ , ch_counter++)
+        {
+            while (line[j] == str1[k])
+            {
+                k++;
+                j++;
+                ch_counter++;
+            }
+            if (strlen(str1) == k)
+            {   
+                ans = ch_counter - k; //we need this for copy file
+                break;
+            }
+            k = 0;
+        }
+    }
+    if( ans < 0)
+    {    
+        fclose(file);
+        fclose(copy);
+
+        remove(address);
+        rename(address_copy, address);
+        error(14);
+    }
+    else
+    {
+        fseek( file , 0 , SEEK_SET);
+        for( int i = 0 ; i < ans ; i++)
+        {
+            char ch = fgetc(file);
+            fputc(ch ,copy);
+        }
+        for(int x = 0 ; x <strlen(str1) ; x++)
+        {
+            fgetc(file);
+        }
+        for(int j = 0 ; j < strlen(str2) ; j++)
+        {
+            fputc(str2[j] , copy);
+        }
+
+        char ch = fgetc(file);
+
+        while(ch != EOF)
+        {
+            fputc(ch , copy);
+            ch = fgetc(file);
+        }
+    }
+    
+    fclose(file);
+    fclose(copy);
+
+    remove(address);
+    rename(address_copy, address);
+
+    return;
 }
 
 void grep_commander(char *file_list)
