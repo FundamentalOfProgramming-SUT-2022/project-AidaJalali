@@ -35,13 +35,15 @@ void dash_size();
 void dash_f_b();
 void dash_files();
 void dash_option();
+void dash_find_option();
 
 // Tools
 void doctor_life(char *);
 void doctor_death(char *);
 void find(char *, int, int, int);
 int line_counter(char *, int); // line = 1
-void place_checker(char *, int, int, int);
+void place_checker(char *, int, int, int); //check error 5 and error 6
+void check_pattern();                      //for find_option
 
 // Vim Functions
 void create_file(char *);
@@ -73,14 +75,24 @@ void tree(char *address, int depth);
 void undo(char *);
 void undo_memory(char *);
 
+void find_commander();
+void find_0_w();
+void find_1_w();
+void find_0();
+void find_1();
+void find_2();
+void find_3();
+
 // VARIABLE
 char command[MAXSIZE];
-char address[MAXSIZE] = "root/";
+//char address[MAXSIZE] = "root/";
+char address[MAXSIZE] ;
 char address_copy[MAXSIZE];     // for remove function
 char clipboard[MAXSIZE];        // for copy function
 char content[MAXSIZE];          // for --str function
 char file_list[MAXSIZE];        // for grep
 char str[MAXSIZE];              // for remove and grep
+int  find_option[MAXSIZE];      // for find option (count = 0 - at = 1 - byword = 2 - all = 3)
 int size;                       // for --size function
 int slash_num = 0;              // for slash counter
 int current_slash = 0;          // for slash counter
@@ -88,21 +100,25 @@ int x = 0;                      // for pos
 int y = 0;                      // for pos
 int f_b = 0;                    // forward and backward ( f = 1 & b = 0)
 int c = 0 ;                     // for c option in grep
+int ch_counter = 0 ;            // for find_0
 char option;                    // for grep command ()
 char *token;                    // for grep_commander
 
 int main()
 {
     printf("Hi!\nwelcome to vim world!\nplease enter your command.\nFor more information use help\n\n");
-    // tree(address, 1);
-      commander();
+    //tree(address, 1);
+    commander();
     //   createfile --file "/aida/manhatan.txt"
     //   undo("aida/aida.txt");
     //   insert_str("aida/aida.txt", "hello mello*******************", 10, 3);
     //   copystr --file /aida/aida.txt --pos 3:2 --size 9 f
     //   pastestr --file /aida/aida.txt --pos 3:2
-    //grep -c --str toto --files root/test1.txt root/test2.txt root/test3.txt 
-    //grep --str toto --files root/test1.txt root/test2.txt root/test3.txt 
+    //   grep -c --str toto --files root/test1.txt root/test2.txt root/test3.txt 
+    //   grep --str toto --files root/test1.txt root/test2.txt root/test3.txt 
+    //   find --str toto --file aida/aida.txt --count --at
+    //   find --str toto --file aida/aida.txt 
+    //   find --str toto --file root/test1.txt
 }
 
 void commander()
@@ -122,10 +138,12 @@ void commander()
         printf("grep              |  grep       --str (option) content --files name_of_files  \n");
         printf("auto-indent       |  auto-indent name_of_file                                 \n");
         printf("compare           |  compare     name_of_file_A name_of_file_B                \n");
-        printf("tree              |  tree depth                                               \n");
+        printf("tree              |  tree        depth                                        \n");
         printf("undo              |  undo        --file name_of_file                          \n");
+        printf("find              |  find        --str content --file name_of_file  option    \n");
         printf("replace           |                                                           \n");
-        printf("find              |                                                           \n");
+        printf("arman             |                                                           \n");
+
         return;
     }
 
@@ -280,6 +298,25 @@ void commander()
         undo(address);
         Done();
     }
+
+    if(!strcmp(command , "find"))
+    {
+        dash_str();
+        //printf("1\n");
+        dash_file();
+        //printf("2\n");
+        scanf("%s" , address);      //different type of address (no \ or " ")
+        //printf("3\n");
+        doctor_death(address);
+        //printf("4\n");
+        dash_find_option();
+        //printf("5\n");
+        check_pattern();
+        //printf("6\n");
+        find_commander();
+        Done();
+    }
+
     else
         error(0);
 }
@@ -346,11 +383,18 @@ void error(int num)
         exit(1);
 
     case 11:
+
         printf("Unable to create folder!");
         exit(1);
 
     case 12:
+
         printf("No such Directory exists in Vim world!");
+        exit(1);
+
+    case 13:
+
+        printf("Invalid Pattern!");
         exit(1);
 
     default:
@@ -409,6 +453,11 @@ void dash_str()
     }
     // printf("syntax is %s\n", syntax);
     // printf("str is %s\n", str);
+}
+
+void dash_str_find()
+{
+
 }
 
 void dash_pos()
@@ -488,6 +537,47 @@ void dash_f_b()
         error(0);
 }
 
+void dash_find_option()
+{
+    for(int i = 0 ; i < 4 ; i++)
+    {
+        find_option[i] = 0 ;
+    }
+
+    char option[MAXSIZE];
+
+    for(int i = 0 ; i < 4 ; i++)
+    {
+        char R = getchar();
+        
+        if(R == '\n')
+            break;
+
+        scanf("%s" ,option);
+
+        if(!strcmp(option ,"--count")|| !strcmp(option ,"-count"))
+        {
+            find_option[0] = 1 ;
+        }
+        if(!strcmp(option ,"--at") || !strcmp(option , "-at"))
+        {
+            find_option[1] = 1;
+        }
+        if(!strcmp(option ,"--byword") || !strcmp(option , "-byword"))
+        {
+            find_option[2] = 1;
+        }
+        if(!strcmp(option ,"--all") || !strcmp(option ,"-all"))
+        {
+            find_option[3] = 1;
+        }
+    }
+    // for(int i = 0 ; i < 4 ; i++)
+    // {
+    //     printf("%d " ,find_option[i]);
+    // }
+    return;
+}
 //                                    ******************ADDRESS*******************
 
 void r()
@@ -499,7 +589,7 @@ void r()
         address_maker_A();
         return;
     }
-    if (R == '"')
+    else if (R == '"')
     {
         address_maker_B();
         return;
@@ -622,6 +712,17 @@ void slash_counter()
             slash_num++;
         }
     }
+}
+
+void check_pattern()
+{
+    if(find_option[0] == 1 && find_option[1] == 1)
+        error(13);
+    
+    if(find_option[1] == 1 && find_option[3] == 1)
+        error(13);
+    
+    else return;
 }
 
 //                                  *****************VIM FUNCTIONS*****************
@@ -911,6 +1012,99 @@ void paste_str(char *address, int y, int x)
     return;
 }
 
+void cut_str(char * address ,int a ,int b )
+{
+
+}
+
+void find_commander()
+{
+    for(int i = 0 ; i < 4 ; i++)
+    {
+        if(find_option[0] == 1)
+        {
+            
+        }
+        if(find_option[1] == 1)
+        {
+
+        }
+        if(find_option[2] == 1)
+        {
+
+        }
+        if(find_option[3] == 1)
+        {
+
+        }
+        else
+        {
+            find_0();
+            return;
+        }
+    }
+}
+
+void find_0_w()
+{
+
+    FILE *file = fopen(address, "rb+");
+
+    int n = line_counter(address, 1);
+    ch_counter = 0 ;
+
+    for (int i = 0; i < n; i++ ,ch_counter++)
+    {
+        char line[MAXSIZE];
+        fgets(line, MAXSIZE, file);
+        int k = 0;
+
+        for (int j = 0; j < strlen(line); j++ , ch_counter++)
+        {
+            while (line[j] == str[k])
+            {
+                k++;
+                j++;
+                ch_counter++;
+            }
+            if (strlen(str) == k)
+            {   
+                printf("It starts from character %d\n" , ch_counter - k);
+                return;
+            }
+            k = 0;
+        }
+    }
+    fclose(file);
+    return;   
+
+}
+
+void find_1_w() //find with wildcard
+{
+
+}
+
+void find_0() //count 
+{
+
+}
+
+void find_1() //at
+{
+
+}
+
+void find_2() //byword
+{
+
+}
+
+void find_3() //all
+{
+
+}
+
 void grep_commander(char *file_list)
 {
     token = strtok(file_list, " ");
@@ -1151,7 +1345,7 @@ void tree(char *address, int depth)
     if (directory == NULL)
         error(12);
 
-    printf("\t\t|%s-----------------------------\n\t\t|\n", address);
+    printf("\t\t|%s\n\t\t|\n", address);
 
     struct dirent *item;
     item = readdir(directory);
