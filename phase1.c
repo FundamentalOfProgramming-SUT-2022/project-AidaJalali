@@ -1,4 +1,4 @@
-//Aida Jalali : 401170542
+// Aida Jalali : 401170542
 #include <stdio.h>
 #include <sys\stat.h>
 #include <unistd.h>
@@ -99,24 +99,33 @@ int main()
 {
     printf("Hi!\nwelcome to vim world!\nplease enter your command.\nFor more information use help\n\n");
     commander();
-    // find --str toto --file aida/aida.txt --count
-    // replace --str1 toto --str2 aidakhare --file aida/aida.txt --at 3
-    // replace --str1 toto --str2 aidakhare --file aida/aida.txt
-    // replace --str1 toto --str2 aida --file aida/aida.txt --all
-    //   createfile --file "/aida/manhatan.txt"
-    //   undo("aida/aida.txt");
-    //  insert_str("aida/aida.txt", "hello mello*******************", 10, 3);
-    //   copystr --file /aida/aida.txt --pos 3:2 --size 9 f
-    //   pastestr --file /aida/aida.txt --pos 3:2
-    //   grep -c --str toto --files root/test1.txt root/test2.txt root/test3.txt
-    //   grep --str toto --files root/test1.txt root/test2.txt root/test3.txt
-    //   find --str toto --file aida/aida.txt --count --at
-    //   find --str toto --file aida/aida.txt --byword
-    //   find --str toto --file aida/aida.txt
-    //   find --str toto --file root/test1.txt
-    //   find --str "toto is moyo" --file root/test1.txt
-    //   find --str "toto is \*motot tototo " --file root/test1.txt
-    //   replace --str1 toto --str2 aidadidaaida --file root/test1.txt
+    // Test List
+    //  createfile --file /tea/aida.txt            (address with /)
+    //  createfile --file "/apple/lolo/maryam.txt" (address with ")
+    //  cat --file  /test1.txt  (address with /)
+    //  cat --file "/test1.txt" (address with ")
+    //  insertstr --file /test1.txt --str boz manam to to --pos 3:5  (It doesn't support \\n item)
+    //  remo
+    //  find --str toto --file aida/aida.txt --count
+    //  replace --str1 toto --str2 aidakhare --file aida/aida.txt --at 3
+    //  replace --str1 toto --str2 aidakhare --file aida/aida.txt
+    //  replace --str1 toto --str2 aida --file aida/aida.txt --all
+    //    createfile --file "/aida/manhatan.txt"
+    //   insert_str("aida/aida.txt", "hello mello*******************", 10, 3);
+    //    copystr --file /aida/aida.txt --pos 3:2 --size 9 f
+    //    pastestr --file /aida/aida.txt --pos 3:2
+    //    grep -c --str toto --files root/test1.txt root/test2.txt root/test3.txt
+    //    grep --str toto --files root/test1.txt root/test2.txt root/test3.txt
+    //    find --str toto --file aida/aida.txt --count --at
+    //    find --str toto --file aida/aida.txt --byword
+    //    find --str toto --file aida/aida.txt
+    //    find --str toto --file root/test1.txt
+    //    find --str "toto is moyo" --file root/test1.txt
+    //    find --str "toto is \*motot tototo " --file root/test1.txt
+    //    replace --str1 toto --str2 aidadidaaida --file root/test1.txt
+    //    auto_indent /test3.txt
+    //    compare root/test1.txt root/test2.txt (it doesn't support normal address)
+    //    tree 3  //It doesn't support depth
 }
 void commander()
 {
@@ -166,7 +175,6 @@ void commander()
         doctor_death(address);
         dash_str(str);
         dash_pos();
-        place_checker(address, y, x, size);
         undo_memory(address);
         insert_str(address, str, y, x);
         Done();
@@ -251,13 +259,14 @@ void commander()
     }
     if (!strcmp(command, "tree"))
     {
+        address[0] = '\0';
+        address[0] = 'r';
+        address[1] = 'o';
+        address[2] = 'o';
+        address[3] = 't';
         int depth;
         scanf("%d", &depth);
-        for (int i = 0; i < strlen(address) - 1; i++)
-        {
-            address_copy[i] = address[i + 1];
-        }
-        tree(address_copy, depth);
+        tree(address, depth);
     }
     if (!strcmp(command, "undo"))
     {
@@ -535,23 +544,23 @@ void r()
 }
 void address_maker_A()
 {
-    address[0] = '\0';
-    scanf("%s", &address);
-    strcat("root/", address);
+    char temp[MAXSIZE];
+    scanf("%s", &temp);
+    strcat(address, temp);
     slash_counter();
     return;
 }
 void address_maker_B()
 {
-    address[0] = '\0';
-    char temp[MAXSIZE];
+    char temp1[MAXSIZE];
+    char temp2[MAXSIZE];
     getchar(); // for /
-    scanf("%s", &temp);
-    for (int i = 0; i < strlen(temp) - 1; i++)
+    scanf("%s", &temp1);
+    for (int i = 0; i < strlen(temp1) - 1; i++)
     {
-        address[i] = temp[i];
+        temp2[i] = temp1[i];
     }
-    strcat("root/", address);
+    strcat(address, temp2);
     slash_counter();
     return;
 }
@@ -647,17 +656,22 @@ void check_pattern()
 void create_folder(char *address)
 {
     strcpy(address_copy, address);
-    char *token = strtok(address_copy, "/");
-    int check = mkdir(token);
+    char *token = strtok(address_copy, "/"); // first token is root/ and we don't need it
     current_slash++;
+    char temp[MAXSIZE];
+    strcpy(temp, token);
+    strcat(temp, "/");
     while (slash_num > current_slash)
     {
         token = strtok(NULL, "/");
-        int check = mkdir(token);
+        strcat(temp, token);
+        strcat(temp, "/");
+        int check = mkdir(temp);
         if (check)
             error(11);
         current_slash++;
     }
+
     create_file(address);
 }
 void create_file(char *address)
@@ -1414,19 +1428,19 @@ void comparator_2(char *file_A, char *file_B, int N, int n) // N --> Big
 }
 void auto_indent(char *address)
 {
-    char copy_name[MAXSIZE] = {0};
-    strcpy(copy_name, address);
-    strcat(copy_name, "___copy");
-    FILE *file = fopen(address, "r");
-    FILE *copy = fopen(copy_name, "w");
-    char *ch;
-    fgets(ch, MAXSIZE, file);
-    if (ch == NULL)
+    FILE *file, *copy;
+    strcpy(address_copy, address);
+    strcat(address_copy, "___copy");
+    file = fopen(address, "rb+");
+    copy = fopen(address_copy, "wb+");
+    char ch;
+    ch = fgetc(file);
+    if (ch == EOF)
         error(8);
     fseek(file, 0, SEEK_SET);
     int counter = 0;
     while (1)
-    {
+    { 
         char ch = fgetc(file);
         if (ch != EOF)
         {
@@ -1441,7 +1455,6 @@ void auto_indent(char *address)
                 for (int i = 0; i < counter; i++)
                     fputs("\t", copy);
             }
-
             else if (ch == '}')
             {
                 counter--;
@@ -1458,10 +1471,11 @@ void auto_indent(char *address)
             fclose(file);
             fclose(copy);
             remove(address);
-            rename(copy_name, address);
+            rename(address_copy, address);
             return;
         }
     }
+
 }
 void undo_memory(char *address)
 {
@@ -1497,6 +1511,8 @@ void undo(char *address)
 }
 void tree(char *address, int depth)
 {
+    if(depth == -1)
+        error(9);
     DIR *directory = opendir(address);
     if (directory == NULL)
         error(12);
