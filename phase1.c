@@ -35,7 +35,8 @@ void dash_find_option();
 void doctor_life(char *);
 void doctor_death(char *);
 void find(char *, int, int, int);
-int line_counter(char *, int);             // line = 1
+int line_counter(char *, int); // line = 1
+int character_counter(char *, int);
 void place_checker(char *, int, int, int); // check error 5 and error 6
 void check_pattern();                      // for find_option
 // Vim Functions
@@ -100,29 +101,28 @@ int main()
     printf("Hi!\nwelcome to vim world!\nplease enter your command.\nFor more information use help\n\n");
     commander();
     // Test List
-    //  createfile --file /tea/aida.txt            (address with /)
-    //  createfile --file "/apple/lolo/maryam.txt" (address with ")
-    //  cat --file  /test1.txt  (address with /)
-    //  cat --file "/test1.txt" (address with ")
-    //  insertstr --file /test1.txt --str boz manam to to --pos 3:5  (It doesn't support \\n item)
-    //  remo
-    //  find --str toto --file aida/aida.txt --count
-    //  replace --str1 toto --str2 aidakhare --file aida/aida.txt --at 3
-    //  replace --str1 toto --str2 aidakhare --file aida/aida.txt
-    //  replace --str1 toto --str2 aida --file aida/aida.txt --all
-    //    createfile --file "/aida/manhatan.txt"
-    //   insert_str("aida/aida.txt", "hello mello*******************", 10, 3);
-    //    copystr --file /aida/aida.txt --pos 3:2 --size 9 f
-    //    pastestr --file /aida/aida.txt --pos 3:2
-    //    grep -c --str toto --files root/test1.txt root/test2.txt root/test3.txt
+    //    createfile --file /tea/aida.txt            (address with /)
+    //    createfile --file "/apple/lolo/maryam.txt" (address with ")
+    //    cat --file  /test1.txt  (address with /)
+    //    cat --file "/test1.txt" (address with ")
+    //    insertstr --file /test1.txt --str boz manam to to --pos 3:5  (It doesn't support \\n item)
+    //    removestr --file /test1.txt --pos 2:2 --size 3 -f
+    //    copystr --file /test1.txt --pos 3:2 --size 9 f
+    //    pastestr --file /test1.txt --pos 3:2
+    //    find --str toto --file /test1.txt
+    //    find --str toto --file /test1.txt --count
+    //    find --str toto --file /test1.txt --at 2
+    //    find --str toto --file /test1.txt --byword
+    //    find --str toto --file /test1.txt --all
+    //    find --str toto --file /test1.txt --count --at 3
+    //    find --str "toto is moyo" --file /test1.txt
+    //    find --str "toto is \*motot tototo " --file /test1.txt
+    //    replace --str1 toto --str2 aidakhare --file /test1.txt --at 1
+    //    replace --str1 toto --str2 aidakhare --file /test1.txt
+    //    replace --str1 toto --str2 aida --file /test1.txt --all
+    //    replace --str1 toto --str2 aidadidaaida --file /test1.txt
     //    grep --str toto --files root/test1.txt root/test2.txt root/test3.txt
-    //    find --str toto --file aida/aida.txt --count --at
-    //    find --str toto --file aida/aida.txt --byword
-    //    find --str toto --file aida/aida.txt
-    //    find --str toto --file root/test1.txt
-    //    find --str "toto is moyo" --file root/test1.txt
-    //    find --str "toto is \*motot tototo " --file root/test1.txt
-    //    replace --str1 toto --str2 aidadidaaida --file root/test1.txt
+    //    grep -c --str toto --files root/test1.txt root/test2.txt root/test3.txt
     //    auto_indent /test3.txt
     //    compare root/test1.txt root/test2.txt (it doesn't support normal address)
     //    tree 3  //It doesn't support depth
@@ -182,14 +182,23 @@ void commander()
     if (!(strcmp(command, "removestr")))
     {
         dash_file();
+        printf("1\n");
         r();
+        printf("2\n");
         (doctor_death(address));
+        printf("3\n");
         dash_pos();
+        printf("4\n");
         dash_size();
+        printf("5\n");
         dash_f_b();
+        printf("6\n");
         place_checker(address, y, x, size);
+        printf("7\n");
         undo_memory(address);
+        printf("8\n");
         remove_commander(address, y, x, size, f_b);
+        printf("9\n");
         Done();
     }
     if (!(strcmp(command, "copystr")))
@@ -212,6 +221,7 @@ void commander()
         dash_pos();
         place_checker(address, y, x, size);
         undo_memory(address);
+        printf("*\n");
         paste_str(address, y, x);
         Done();
     }
@@ -282,7 +292,7 @@ void commander()
         dash_str(str);
         dash_str_find();
         dash_file();
-        scanf("%s", address); // different type of address (no \ or " ")
+        r();
         doctor_death(address);
         dash_find_option();
         check_pattern();
@@ -294,7 +304,7 @@ void commander()
         dash_str(str1);
         dash_str(str2);
         dash_file();
-        scanf("%s", &address); // different type of address (no \ or " ")
+        r();
         doctor_death(address);
         dash_find_option();
         check_pattern();
@@ -476,6 +486,7 @@ void dash_option()
 }
 void dash_f_b()
 {
+    getchar();
     getchar(); // for -
     char R = getchar();
     if (R == 'f')
@@ -633,6 +644,20 @@ int line_counter(char *address, int y)
     fclose(file);
     return y;
 }
+int character_counter(char *address, int x)
+{
+    char ch;
+    FILE *file;
+    file = fopen(address, "rb+");
+    ch = fgetc(file);
+    while (ch != EOF)
+    {
+        ch = fgetc(file);
+        x++;
+    }
+    fclose(file);
+    return x;
+}
 void slash_counter()
 {
     for (int i = 0; i < strlen(address); i++)
@@ -771,8 +796,10 @@ void remove_commander(char *address, int y, int x, int size, int f_b)
     {
     case 1:
         remove_str_f(address, y, x, size);
+        return;
     case 0:
         remove_str_b(address, y, x, size);
+        return;
     default:
         error(0);
     }
@@ -780,34 +807,29 @@ void remove_commander(char *address, int y, int x, int size, int f_b)
 void remove_str_f(char *address, int y, int x, int size) //( f = 1 & b = 0)
 {
     // y starts from 1 and x starts from 0
+    int n = character_counter(address, 0);
+    int n_2 = 0;
     strcpy(address_copy, address);
     strcat(address_copy, "___copy");
     FILE *file = fopen(address, "rb+");
     FILE *copy = fopen(address_copy, "wb+");
-    char ch;
     for (int i = 1; i < y; i++)
     {
-        while (ch != '\n')
-        {
-            ch = fgetc(file);
-            if (ch == EOF)
-                error(5);
-            fputc(ch, copy);
-        }
+        char line[MAXSIZE];
+        fgets(line, MAXSIZE, file);
+        fputs(line, copy);
+        n_2 += strlen(line);
     }
-    for (int i = 0; i < x; i++)
+    for (int j = 0; j < size; j++)
+    {
+        fgetc(file);
+        n_2++;
+    }
+    char ch;
+    for (int k = n_2; k < n; k++)
     {
         ch = fgetc(file);
         fputc(ch, copy);
-    }
-    for (int i = 0; i < size; i++)
-    {
-        fgetc(file);
-    }
-    while (ch != EOF)
-    {
-        fputc(ch, copy);
-        fgetc(file);
     }
     fclose(file);
     fclose(copy);
@@ -977,11 +999,12 @@ void find_0() // count
                 k++;
                 j++;
             }
-            if (strlen(str) - 1 == k)
+            if (strlen(str) == k)
             {
-                ans++; // we need this for copy file
+                ans++;
                 k = 0;
             }
+            k = 0;
         }
     }
     if (ans == 0)
@@ -1099,7 +1122,7 @@ void find_3() // all
             }
             if (strlen(str) == k)
             {
-                printf("%d ", ch_counter - k);
+                printf("%d\n", ch_counter - k);
                 k = 0;
             }
         }
@@ -1440,7 +1463,7 @@ void auto_indent(char *address)
     fseek(file, 0, SEEK_SET);
     int counter = 0;
     while (1)
-    { 
+    {
         char ch = fgetc(file);
         if (ch != EOF)
         {
@@ -1475,7 +1498,6 @@ void auto_indent(char *address)
             return;
         }
     }
-
 }
 void undo_memory(char *address)
 {
@@ -1511,7 +1533,7 @@ void undo(char *address)
 }
 void tree(char *address, int depth)
 {
-    if(depth == -1)
+    if (depth == -1)
         error(9);
     DIR *directory = opendir(address);
     if (directory == NULL)
