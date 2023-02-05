@@ -107,8 +107,9 @@ int main()
     //    cat --file "/test1.txt" (address with ")
     //    insertstr --file /test1.txt --str boz manam to to --pos 3:5  (It doesn't support \\n item)
     //    removestr --file /test1.txt --pos 2:2 --size 3 -f
-    //    copystr --file /test1.txt --pos 3:2 --size 9 f
-    //    pastestr --file /test1.txt --pos 3:2
+    //    copystr --file /test1.txt --pos 1:2 --size 2 f
+    //    pastestr --file /test2.txt --pos 3:2
+    //    cutstr --file /test1.txt --pos 2:4
     //    find --str toto --file /test1.txt
     //    find --str toto --file /test1.txt --count
     //    find --str toto --file /test1.txt --at 2
@@ -117,15 +118,15 @@ int main()
     //    find --str toto --file /test1.txt --count --at 3
     //    find --str "toto is moyo" --file /test1.txt
     //    find --str "toto is \*motot tototo " --file /test1.txt
-    //    replace --str1 toto --str2 aidakhare --file /test1.txt --at 1
-    //    replace --str1 toto --str2 aidakhare --file /test1.txt
+    //    replace --str1 toto --str2 aida --file /test1.txt
     //    replace --str1 toto --str2 aida --file /test1.txt --all
-    //    replace --str1 toto --str2 aidadidaaida --file /test1.txt
+    //    replace --str1 toto --str2 aidakhare --file /test1.txt --at 1
     //    grep --str toto --files root/test1.txt root/test2.txt root/test3.txt
     //    grep -c --str toto --files root/test1.txt root/test2.txt root/test3.txt
     //    auto_indent /test3.txt
     //    compare root/test1.txt root/test2.txt (it doesn't support normal address)
     //    tree 3  //It doesn't support depth
+    //    undo --file /test1.txt
 }
 void commander()
 {
@@ -182,23 +183,14 @@ void commander()
     if (!(strcmp(command, "removestr")))
     {
         dash_file();
-        printf("1\n");
         r();
-        printf("2\n");
         (doctor_death(address));
-        printf("3\n");
         dash_pos();
-        printf("4\n");
         dash_size();
-        printf("5\n");
         dash_f_b();
-        printf("6\n");
         place_checker(address, y, x, size);
-        printf("7\n");
         undo_memory(address);
-        printf("8\n");
         remove_commander(address, y, x, size, f_b);
-        printf("9\n");
         Done();
     }
     if (!(strcmp(command, "copystr")))
@@ -221,7 +213,6 @@ void commander()
         dash_pos();
         place_checker(address, y, x, size);
         undo_memory(address);
-        printf("*\n");
         paste_str(address, y, x);
         Done();
     }
@@ -283,7 +274,6 @@ void commander()
         dash_file();
         r();
         doctor_death(address);
-        undo_memory(address);
         undo(address);
         Done();
     }
@@ -875,52 +865,73 @@ void remove_str_b(char *address, int y, int x, int size)
 }
 void copy_str(char *address, int y, int x, int size, int f_b)
 {
-    FILE *file = fopen(address, "r");
-    clipboard[0] = '\0';
-    char content[MAXSIZE];
-    for (int line = 0; line < y; line++)
+    int n = character_counter(address, 0);
+    int n_2 = 0;
+    address_copy[0] = 'r';
+    address_copy[1] = 'o';
+    address_copy[2] = 'o';
+    address_copy[3] = 't';
+    address_copy[4] = '/';
+    strcat(address_copy, "_clipboard");
+    FILE *file = fopen(address, "rb+");
+    FILE *copy = fopen(address_copy, "wb+");
+    for (int i = 1; i < y; i++)
     {
-        fgets(content, MAXSIZE, file);
-        if (content == NULL)
-        {
-            fclose(file);
-            error(5);
-        }
+        char line[MAXSIZE];
+        fgets(line, MAXSIZE, file);
+        n_2 += strlen(line);
     }
-    for (int ch = 0; ch < x; ch++)
-        fgetc(file);
-    for (int i = 0; i < size; i++)
+    char ch;
+    for (int j = 0; j < size; j++)
     {
-        char ch = fgetc(file);
-        clipboard[i] = ch;
+        ch = fgetc(file);
+        fputc(ch, copy);
+        n_2++;
     }
-    // printf("%s" , clipboard);
+    for (int k = n_2; k < n; k++)
+    {
+        ch = fgetc(file);
+    }
     fclose(file);
+    fclose(copy);
     return;
 }
 void paste_str(char *address, int y, int x)
 {
-    FILE *file = fopen(address, "w");
-    if (clipboard == NULL)
+    int n = character_counter(address, 0);
+    int n_2 = 0;
+    address_copy[0] = 'r';
+    address_copy[1] = 'o';
+    address_copy[2] = 'o';
+    address_copy[3] = 't';
+    address_copy[4] = '/';
+    strcat(address_copy, "_clipboard");
+    FILE *file = fopen(address, "rb+");
+    FILE *copy = fopen(address_copy, "wb+");
+    char r;
+    r = fgetc(copy);
+    if (r == EOF)
         error(10);
-    for (int line = 0; line < y; line++)
+    for (int i = 1; i < y; i++)
     {
-        fgets(content, MAXSIZE, file);
-        if (content == NULL)
-        {
-            fclose(file);
-            error(5);
-        }
+        char line[MAXSIZE];
+        fgets(line, MAXSIZE, file);
+        n_2 += strlen(line);
     }
-    for (int ch = 0; ch < x; ch++)
+    char ch;
+    for (int j = 0; j < size; j++)
+    {
+        ch = fgetc(file);
+        fputc(ch, copy);
+        n_2++;
+    }
+    for (int k = n_2; k < n; k++)
+    {
         fgetc(file);
-    for (int i = 0; i < size; i++)
-    {
-        char ch = fgetc(file);
-        fputc(clipboard[i], file);
     }
-    clipboard[0] = '\0';
     fclose(file);
+    fclose(copy);
+    remove(address_copy);
     return;
 }
 void find_commander()
@@ -1503,9 +1514,9 @@ void undo_memory(char *address)
 {
     char copy_name[MAXSIZE];
     strcpy(copy_name, address);
-    strcat(copy_name, "___copy");
-    FILE *file = fopen(address, "r");
-    FILE *copy = fopen(copy_name, "w");
+    strcat(copy_name, "_copy");
+    FILE *file = fopen(address, "rb+");
+    FILE *copy = fopen(copy_name, "wb+");
     fseek(file, 0, SEEK_SET);
     char ch = fgetc(file);
     while (ch != EOF)
@@ -1513,16 +1524,15 @@ void undo_memory(char *address)
         fputc(ch, copy);
         ch = fgetc(file);
     }
-    fclose(file);
     fclose(copy);
+    fclose(file);
     return;
 }
 void undo(char *address)
 {
     char copy_name[MAXSIZE];
     strcpy(copy_name, address);
-    strcat(copy_name, "___copy");
-    printf("%s\n", copy_name);
+    strcat(copy_name, "_copy");
     FILE *file = fopen(address, "r");
     FILE *copy = fopen(copy_name, "r");
     fclose(file);
